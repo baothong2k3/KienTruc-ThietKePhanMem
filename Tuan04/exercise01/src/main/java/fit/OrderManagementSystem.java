@@ -9,18 +9,25 @@ package fit;/*
 // ShippingStrategy.java (Strategy Pattern)
 // OrderComponent.java (Decorator Pattern)
 
+import fit.decorator.BasicOrder;
+import fit.decorator.OrderComponent;
+import fit.decorator.OrderWithTracking;
+import fit.state.OrderContext;
+import fit.strategy.ExpressShipping;
+import fit.strategy.Order;
+import fit.strategy.StandardShipping;
+
 public class OrderManagementSystem {
     public static void main(String[] args) {
-
         // State Pattern Usage
-        System.out.println("---State Pattern Usage---");
+        System.out.println("--- State Pattern ---");
         OrderContext orderContext = new OrderContext();
         orderContext.processOrder();
         orderContext.processOrder();
         orderContext.processOrder();
 
         // Strategy Pattern Usage
-        System.out.println("---Strategy Pattern Usage---");
+        System.out.println("\n--- Strategy Pattern ---");
         Order order = new Order();
         order.setShippingStrategy(new StandardShipping());
         order.shipOrder();
@@ -29,7 +36,7 @@ public class OrderManagementSystem {
         order.shipOrder();
 
         // Decorator Pattern Usage
-        System.out.println("---Decorator Pattern Usage---");
+        System.out.println("\n--- Decorator Pattern ---");
         OrderComponent basicOrder = new BasicOrder();
         OrderComponent trackedOrder = new OrderWithTracking(basicOrder);
         trackedOrder.process();

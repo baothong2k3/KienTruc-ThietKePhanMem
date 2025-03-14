@@ -9,6 +9,12 @@ package fit;/*
  * @version: 1.0
  */
 
+import fit.decorator.EnvironmentalTaxDecorator;
+import fit.product.Product;
+import fit.strategy.LuxuryTaxStrategy;
+import fit.strategy.TaxStrategy;
+import fit.strategy.VATTaxStrategy;
+
 // Demo class: Tests the usage of Strategy, State, and Decorator Patterns
 public class TaxCalculationDemo {
     public static void main(String[] args) {
@@ -16,6 +22,7 @@ public class TaxCalculationDemo {
         Product product2 = new Product("Basic Item", 100);
 
         // Apply different tax strategies (Strategy Pattern)
+        System.out.println("--- Applying different tax strategies ---");
         product1.setTaxStrategy(new LuxuryTaxStrategy());
         product2.setTaxStrategy(new VATTaxStrategy());
 
@@ -23,6 +30,7 @@ public class TaxCalculationDemo {
         System.out.println(product2 + ", Final Price: " + product2.calculateFinalPrice());
 
         // Add decorator to tax strategy (Decorator Pattern)
+        System.out.println("--- Applying decorator to tax strategy ---");
         TaxStrategy ecoFriendlyLuxuryTax = new EnvironmentalTaxDecorator(new LuxuryTaxStrategy());
         product1.setTaxStrategy(ecoFriendlyLuxuryTax);
 
