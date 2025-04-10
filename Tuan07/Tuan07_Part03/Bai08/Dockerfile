@@ -1,12 +1,5 @@
-FROM node:18
-
-WORKDIR /usr/src/app
-
-COPY app/package*.json ./
-RUN npm install
-
-COPY app .
-COPY app/wait-for-it.sh /wait-for-it.sh
-RUN chmod +x /wait-for-it.sh
-
-CMD ["/wait-for-it.sh", "mysql:3306", "--", "npm", "start"]
+FROM python:3.11-slim
+WORKDIR /code
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .

@@ -1,23 +1,29 @@
 services:
-  app:
+  django:
     build: .
-    ports:
-      - "3000:3000"
-    depends_on:
-      - mysql
-    restart: always
-
-  mysql:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: testdb
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-    ports:
-      - "3306:3306"
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - .:/code
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=django_project.settings
+    depends_on:
+      - redis
 
-volumes:
-  mysql_data:
+  celery:
+    build: .
+    command: celery -A django_project worker --loglevel=info
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=django_project.settings
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
