@@ -1,16 +1,64 @@
+
 services:
-  mysql:
-    image: mysql:5.7
-    container_name: mysql-volume-demo
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: mydb
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+  traefik:
+    image: traefik:v2.11
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
     ports:
-      - "3306:3306"
+      - "8088:80"       # Cổng public cho web (Flask, WordPress)
+      - "8080:8080"     # Cổng dashboard của Traefik
     volumes:
-      - mysql_data:/var/lib/mysql
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
+    networks:
+      - web
+
+  flask-app:
+    build: ./flask
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flask.rule=PathPrefix(`/flask`)"
+      - "traefik.http.routers.flask.middlewares=flask-stripprefix"
+      - "traefik.http.middlewares.flask-stripprefix.stripPrefix.prefixes=/flask"
+      - "traefik.http.services.flask.loadbalancer.server.port=5000"
+    networks:
+      - web
+
+  wordpress:
+    image: wordpress
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: example
+      WORDPRESS_DB_PASSWORD: example
+      WORDPRESS_DB_NAME: example
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME','http://localhost:8088/wp');
+        define('WP_SITEURL','http://localhost:8088/wp');
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.rule=PathPrefix(`/wp`)"
+      - "traefik.http.routers.wordpress.middlewares=wp-stripprefix"
+      - "traefik.http.middlewares.wp-stripprefix.stripPrefix.prefixes=/wp"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+    networks:
+      - web
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: example
+      MYSQL_USER: example
+      MYSQL_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: example
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - web
+
+networks:
+  web:
 
 volumes:
-  mysql_data:
+  db_data:
